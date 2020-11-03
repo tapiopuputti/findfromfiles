@@ -1,3 +1,5 @@
-This program will find a keyword inside files.
+This program will search for a keyword inside files in a given directory (defaults to current directory) and prints the results to the user.
+
 The keyword and directory will be asked from the user.
-NOTE: The program does not work (yet) if there are non-text files inside the given directory.
+
+Non-text files will be skipped.
