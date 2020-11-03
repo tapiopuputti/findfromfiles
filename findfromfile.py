@@ -34,17 +34,17 @@ def search_text(keyword:str, path:str):
         # Search for keyword in files
         for filename in files:
             absolutefilepath = os.path.join(path, filename)
-            f = open(absolutefilepath, 'r',  encoding="utf-8") # TODO: with open
-            text = f.read() 
-            # print('\nINSPECTING FILE: ' + path + filename) 
-            # print(text)
-            matches = re.findall(keyword, text)
-            # If there are matches, append them to results
-            if len(matches) > 0:
-                results.append([filename, len(matches)])
+            with open(absolutefilepath, 'r', encoding="utf-8") as f:
+                text = f.read() 
+                # print('\nINSPECTING FILE: ' + path + filename) 
+                # print(text)
+                matches = re.findall(keyword, text)
+                # If there are matches, append them to results
+                if len(matches) > 0:
+                    results.append([filename, len(matches)])
 
         # Print how many files have been searched through and what was the keyword
-        print(f"\nSearched through {colors.BOLD}{colors.YELLOW}{len(files)}{colors.END} files for keyword '{colors.GREEN}{colors.UNDERLINE}{keyword}{colors.END}' in path '{colors.GREEN}{colors.UNDERLINE}{path}{colors.END}'")
+        print(f"\nSearched through {colors.BOLD}{colors.YELLOW}{len(files)}{colors.END} files for keyword '{colors.GREEN}{colors.UNDERLINE}{keyword}{colors.END}' in path '{colors.GREEN}{colors.UNDERLINE}{path}{colors.END}'\n")
 
         # Print which files contain the keywords and how many times and add number of hits to total_occurrences
         total_occurrences = 0
@@ -56,22 +56,27 @@ def search_text(keyword:str, path:str):
                 print(f"{colors.RED}{item[1]:4}{colors.END} hits in file '{colors.BOLD}{item[0]}{colors.END}'")
 
         # Print total occurrences
-        print(f"\n{colors.MAGENTA}{total_occurrences:4}{colors.END} total occurrences in {colors.BOLD}{colors.YELLOW}{len(results)}{colors.END} file(s).")
+        print(f"\n{colors.MAGENTA}{total_occurrences:4}{colors.END} total occurrences in {colors.BOLD}{colors.YELLOW}{len(results)}{colors.END} file(s).\n")
+
+        return [total_occurrences, len(results)] # Test ran without errors, return total occurrences and number of files where hits occurred (for testing purposes)
 
     # Handle errors
     except IOError:
         print('\nProblem reading: ' + filename)
+        return 'Fail'
     except TypeError:
         print("\nInvalid path, please try again.")
+        return 'Fail'
     except UnicodeDecodeError:
         print("\nDecode error, file " + filename + " probably not a text file.")
+        return 'Fail'
     # Comment next except to find out details of error (TODO: print error details always, handle all errors?)
     except:
         print(f"Unhandled error, filename '{filename}', error: {os.error}")
+        return 'Fail'
     
 
-
-# Function to ask user for keyword and directory
+# Function to ask user for search keyword and directory
 # TODO: validate proper string for directory
 def user_input():
     path = input("Give the folder to search in (Enter = current directory): ")
@@ -82,7 +87,10 @@ def user_input():
 
 
 if __name__ == "__main__": 
+    # print(search_text('lorem', './test/'))
     user_input()
+    #search_text('random', 'test/nontext/')
+    #search_text('random', 'asd')
 
 # TODO: search subdirectories (ask it y/n?) os.walk
 # TODO: detect if file is non-text and skip it
