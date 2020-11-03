@@ -13,23 +13,26 @@ class colors:
     END = '\033[0m' # end colors
 
 
-# Function to list files and return list of filenames in a given path
+# Function to list files and return list of filenames inside the given directory
 def list_files(path:str) -> list:
-    files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-    # Print filenames
-    # print("Files in folder '" + path + "'") 
-    # for file in files:
-    #     print("  " + file)
-    return files
+    try:
+        files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+        return files
+    except FileNotFoundError:
+        pass # This error is handled inside search_text()-function
+        # print("Invalid path, please try again.")
+    # # Comment next except to find out details of error (TODO: print error details always, handle all errors?)
+    except:
+        print(f"Unhandled error: {os.error}")
 
-# Search text inside files in given directory
+# Search text inside files in the given directory
 def search_text(keyword:str, path:str):
     # Make a list of all files in the directory
     files = list_files(path)
     results = []
-    for filename in files:
-        try:
-            # Search for keyword in file
+    try:
+        # Search for keyword in files
+        for filename in files:
             absolutefilepath = os.path.join(path, filename)
             f = open(absolutefilepath, 'r',  encoding="utf-8") # TODO: with open
             text = f.read() 
@@ -39,24 +42,33 @@ def search_text(keyword:str, path:str):
             # If there are matches, append them to results
             if len(matches) > 0:
                 results.append([filename, len(matches)])
-        except IOError:
-            print('Problem reading: ' + filename)
-        # Comment next except to find out details of error (TODO: print error details always, handle all errors?)
-        except:
-            print(f"Unhandled error, filename '{filename}' {os.error}")
+
+        # Print how many files have been searched through and what was the keyword
+        print(f"\nSearched through {colors.BOLD}{colors.YELLOW}{len(files)}{colors.END} files for keyword '{colors.GREEN}{colors.UNDERLINE}{keyword}{colors.END}' in path '{colors.GREEN}{colors.UNDERLINE}{path}{colors.END}'")
+
+        # Print which files contain the keywords and how many times and add number of hits to total_occurrences
+        total_occurrences = 0
+        for item in results:
+            total_occurrences += item[1]
+            if item[1] == 1:
+                print(f"{colors.RED}{item[1]:4}{colors.END} hit  in file '{colors.BOLD}{item[0]}{colors.END}'")
+            else:
+                print(f"{colors.RED}{item[1]:4}{colors.END} hits in file '{colors.BOLD}{item[0]}{colors.END}'")
+
+        # Print total occurrences
+        print(f"\n{colors.MAGENTA}{total_occurrences:4}{colors.END} total occurrences in {colors.BOLD}{colors.YELLOW}{len(results)}{colors.END} file(s).")
+
+    # Handle errors
+    except IOError:
+        print('\nProblem reading: ' + filename)
+    except TypeError:
+        print("\nInvalid path, please try again.")
+    except UnicodeDecodeError:
+        print("\nDecode error, file " + filename + " probably not a text file.")
+    # Comment next except to find out details of error (TODO: print error details always, handle all errors?)
+    except:
+        print(f"Unhandled error, filename '{filename}', error: {os.error}")
     
-    # Print how many files contain keyword and which files contain the keywords and how many times
-    print(f"\nSearched through {colors.BOLD}{colors.YELLOW}{len(files)}{colors.END} files for keyword '{colors.GREEN}{colors.UNDERLINE}{keyword}{colors.END}' in path '{colors.GREEN}{colors.UNDERLINE}{path}{colors.END}'")
-    total_occurrences = 0
-    for item in results:
-        total_occurrences += item[1]
-        if item[1] == 1:
-            print(f"{colors.RED}{item[1]:4}{colors.END} hit  in file '{colors.BOLD}{item[0]}{colors.END}'")
-        else:
-            print(f"{colors.RED}{item[1]:4}{colors.END} hits in file '{colors.BOLD}{item[0]}{colors.END}'")
-    # Print total occurrences
-    print(f"\n{colors.MAGENTA}{total_occurrences:4}{colors.END} total occurrences in {colors.BOLD}{colors.YELLOW}{len(results)}{colors.END} file(s).")
-    # print(results)
 
 
 # Function to ask user for keyword and directory
@@ -72,11 +84,5 @@ def user_input():
 if __name__ == "__main__": 
     user_input()
 
-#list_files('c:/code')
-# list_files('./')
-#print(list_files('./'))
-
-# search_text("file", "c:/code/findfromfiles/")
-# search_text("repeatedly", "c:/code/")
-
 # TODO: search subdirectories (ask it y/n?) os.walk
+# TODO: detect if file is non-text and skip it
