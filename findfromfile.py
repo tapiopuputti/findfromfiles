@@ -103,3 +103,4 @@ if __name__ == "__main__":
 
 
 # TODO: search subdirectories (ask it y/n?) os.walk
+# TODO: Docstring
